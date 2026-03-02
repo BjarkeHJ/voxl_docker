@@ -76,9 +76,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN rosdep init || true && rosdep update --rosdistro humble
 
 # Third-party apt dependencies (dev packages: headers + libs)
-COPY deps/apt-deps-dev.txt /tmp/apt-deps-dev.txt
+COPY deps/apt-deps.txt /tmp/apt-deps.txt
 RUN apt-get update \
-  && grep -vE '^\s*#|^\s*$' /tmp/apt-deps-dev.txt | xargs -r apt-get install -y --no-install-recommends \
+  && grep -vE '^\s*#|^\s*$' /tmp/apt-deps.txt | xargs -r apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # Third-party Python dependencies
@@ -86,6 +86,13 @@ COPY deps/pip-requirements.txt /tmp/pip-requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/pip-requirements.txt
 
 # Third-party source builds (clone git repos etc... Each build is its own RUN layer so they cache independently - PIN to tag for reproducability)
+COPY voxl_airlab_thirdparty/ /opt/thirdparty
+RUN +chmod /opt/thirdparty/build_thirdparty.sh \
+  && cd /opt/thirdparty \
+  && ./build_thirdparty.sh \
+  && rm -rf /opt/thirdparty
+  
+# ROSDEP DRYRUN AS LAST STEP OF DEPS SETUP
 
 # Refresh the linker chache so shared libs under /usr/local/lib are found
 RUN ldconfig
@@ -139,6 +146,7 @@ ENV RC_ALL=C.UTF-8
 
 # Setup ROS2 Humble Sources
 RUN apt-get update && apt-get install -y \
+  software-properties-common \
   curl \
   && add-apt-repository universe \
   && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
@@ -158,9 +166,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
   
 # Runtime-only apt dependencies (shared libs, no headers) - Runtime counterparts of -dev packages in Stage 1
-COPY deps/apt-deps-runtime.txt /tmp/apt-deps-runtime.txt
-RUN apt-get update \ 
-  && grep -vE '^\s*#|^\s*$' /tmp/apt-deps-dev.txt | xargs -r apt-get install -y --no-install-recommends \
+# COPY deps/apt-deps-runtime.txt /tmp/apt-deps-runtime.txt
+# RUN apt-get update \ 
+#   && grep -vE '^\s*#|^\s*$' /tmp/apt-deps-runtime.txt | xargs -r apt-get install -y --no-install-recommends \
+#   && rm -rf /var/lib/apt/lists/*
+
+COPY deps/apt-deps.txt /tmp/apt-deps.txt
+RUN apt-get update \
+  && grep -vE '^\s*#|^\s*$' /tmp/apt-deps.txt \
+    | xargs -r apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # Runtime Python dependencies

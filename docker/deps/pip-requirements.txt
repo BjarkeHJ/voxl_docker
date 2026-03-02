@@ -10,4 +10,13 @@
 # ==========================================================
 
 # EXAMPLE
-# numpy==1.24.4         # needed in: voxl-blabla-package
+# Package: numpy==1.24.4 needed in: voxl-blabla-package
+
+# Package: setuptools needed in: 
+setuptools
+
+# Package: wheel needed in:
+wheel
+
+# Package: catkin_pkg needed in:
+catkin_pkg
