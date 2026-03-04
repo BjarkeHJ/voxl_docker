@@ -1,3 +1,6 @@
+[submodule "ros2_ws/src"]
+	path = ros2_ws/src
+	url = https://github.com/JonanaBanana/voxl_ros2_ws
 [submodule "docker/voxl_airlab_thirdparty"]
 	path = docker/voxl_airlab_thirdparty
-	url = https://github.com/JonanaBanana/voxl_airlab_thirdparty.git
+	url = https://github.com/JonanaBanana/voxl_airlab_thirdparty
