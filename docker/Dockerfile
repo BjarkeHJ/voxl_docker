@@ -55,11 +55,17 @@ RUN apt-get update && apt-get install -y \
 #TODO: remove image_transport and image_view dependency from rovtio (not necessary)
 RUN apt-get update && apt-get install -y \
   ros-humble-ros-base \
-  ros-humble-vision-opencv \
   ros-humble-rmw-cyclonedds-cpp \
   ros-humble-launch-testing \
   ros-humble-ament-cmake \
+  && rm -rf /var/lib/apt/lists/*
+
+# Smaller ROS2 packages (apt) - Layered for cachability
+RUN apt-get update && apt-get install -y \
+  ros-humble-vision-opencv \
+  ros-humble-v4l2-camera \
   ros-humble-image-transport \
+  ros-humble-ffmpeg-image-transport \
   ros-humble-image-view \
   ros-humble-rosbag2-storage-mcap \
   && rm -rf /var/lib/apt/lists/*
@@ -95,33 +101,33 @@ RUN pip3 install --no-cache-dir -r /tmp/pip-requirements.txt
 
 # Third-party source builds (clone git repos etc... Each build is its own RUN layer so they cache independently - PIN to tag for reproducability)
 RUN echo "===== Building Third-Party dependencies ====="
-COPY voxl_airlab_thirdparty/ thirdparty/
+# COPY voxl_airlab_thirdparty/ thirdparty/
 
 # CERES-SOLVER/
-RUN apt update \
-  && cd /thirdparty/build_scripts/ \
-  && chmod +x build_ceres.sh \
-  && ./build_ceres.sh
+# RUN apt update \
+#   && cd /thirdparty/build_scripts/ \
+#   && chmod +x build_ceres.sh \
+#   && ./build_ceres.sh
 
 # KINDR
-RUN apt update \
-  && cd /thirdparty/build_scripts/ \
-  && chmod +x build_kindr.sh \
-  && ./build_kindr.sh 
+# RUN apt update \
+#   && cd /thirdparty/build_scripts/ \
+#   && chmod +x build_kindr.sh \
+#   && ./build_kindr.sh 
 
 # ORBSLAM3
-RUN apt update \
-  && cd /thirdparty/build_scripts/ \
-  && chmod +x build_orbslam3.sh \
-  && ./build_orbslam3.sh 
+# RUN apt update \
+#   && cd /thirdparty/build_scripts/ \
+#   && chmod +x build_orbslam3.sh \
+#   && ./build_orbslam3.sh 
 
 # VINS-Core
-RUN apt update \
-  && cd /thirdparty/build_scripts/ \
-  && chmod +x build_vins_core.sh \
-  && ./build_vins_core.sh 
+# RUN apt update \
+#   && cd /thirdparty/build_scripts/ \
+#   && chmod +x build_vins_core.sh \
+#   && ./build_vins_core.sh 
 
-# ROSDEP DRYRUN AS LAST STEP OF DEPS SETUP
+# ROSDEP DRYRUN AS LAST STEP OF DEPS SETUP??
 
 # Refresh the linker chache so shared libs under /usr/local/lib are found
 RUN ldconfig
@@ -176,11 +182,17 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # Install ROS2 packages (base + build tools) 
-#TODO: remove image_transport and image_view dependency from rovtio (not necessary)
 RUN apt-get update && apt-get install -y \
   ros-humble-ros-base \
   ros-humble-rmw-cyclonedds-cpp \
+  && rm -rf /var/lib/apt/lists/*
+
+# TODO: remove image_transport and image_view dependency from rovtio (not necessary)
+# Smaller ROS2 packages (apt) - Layered for cachability (remove v4l2-cameram, image-transport, ffmpeg-image-transtport)
+RUN apt-get update && apt-get install -y \
+  ros-humble-v4l2-camera \
   ros-humble-image-transport \
+  ros-humble-ffmpeg-image-transport \
   ros-humble-image-view \
   ros-humble-rosbag2-storage-mcap \
   && rm -rf /var/lib/apt/lists/*
@@ -208,7 +220,8 @@ RUN pip3 install --no-cache-dir -r /tmp/pip-requirements.txt
 COPY --from=voxl-deps /usr/local/lib /usr/local/lib
 COPY --from=voxl-deps /usr/local/share/ /usr/local/share
 COPY --from=voxl-deps /usr/local/bin /usr/local/bin
-COPY --from=voxl-deps /thirdparty /thirdparty
+# COPY --from=voxl-deps /thirdparty /thirdparty
+
 RUN ldconfig
 
 # RMW

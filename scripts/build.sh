@@ -199,18 +199,21 @@ cmd_export_runtime() {
 
 cmd_extract_install() {
     local dest="${PROJECT_DIR}/deploy/install"
-    rm -rf "${dest}"
+    # rm -rf "${dest}"
+    docker run --rm -v "${dest}:/dest" alpine sh -c "rm -rf /dest/*"
     mkdir -p "${dest}"
 
     echo "==> Extracting arm64 install/ from cross-build volume..."
 
     # Use existing image to access the name volume
     docker run --rm \
-        -v cross-install:/src:ro \
-        -v "${dest}:/dest" \
-        "${IMAGE_NAME}:dev-amd64" \
-        bash -c "cp -a /src/. /dest/"
-
+    -v cross-install:/src:ro \
+    -v cross-build:/ros2_ws/build:ro \
+    -v "${PROJECT_DIR}/ros2_ws/src:/ros2_ws/src:ro" \
+    -v "${dest}:/dest" \
+    "${IMAGE_NAME}:dev-arm64" \
+    bash -c "cp -aL /src/. /dest/"
+    
     echo "==> Extracted to ${dest}/"
     echo "    Contents:"
     ls "${dest}/" 2>/dev/null || echo "    (empty — have you run build-ws-cross?)"
@@ -267,8 +270,8 @@ cmd_deploy_image() {
     echo "==> Transferring runtime image to drone..."
     rsync -avz --progress "${image_file}" "${VOXL_USER}@${VOXL_HOST}:/tmp/"
 
-    echo "==> Loading image on drone..."
-    ssh "${VOXL_USER}@${VOXL_HOST}" "docker load < /tmp/voxl-runtime-arm64.tar.gz && rm /tmp/voxl-runtime-arm64.tar.gz"
+    echo "==> Loading image on drone... (This may take a while)"
+    ssh "${VOXL_USER}@${VOXL_HOST}" "docker load < /tmp/voxl-runtime-arm64.tar.gz && rm /tmp/voxl-runtime-arm64.tar.gz && exit"
 
     echo "==> Done. Image loaded on drone."
 }
@@ -278,7 +281,7 @@ cmd_deploy_image() {
 cmd_voxl_start() {
     echo "==> Starting drone container on ${VOXL_HOST}..."
     ssh -t "${VOXL_USER}@${VOXL_HOST}" \
-        "cd ${VOXL_DIR} && docker compose up -d"
+        "cd ${VOXL_DIR} && docker compose -f docker-compose.yml up -d"
 }
 
 cmd_voxl_shell() {

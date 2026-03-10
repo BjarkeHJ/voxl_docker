@@ -22,6 +22,7 @@ services:
       - dev-log:/ros2_ws/log
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XAUTHORITY:-$HOME/.Xauthority}:/tmp/.docker.xauth:ro
+      - /dev:/dev                                     # Serial ports, cameras, etc...
     environment:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/tmp/.docker.xauth
