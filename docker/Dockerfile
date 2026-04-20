@@ -24,6 +24,10 @@ FROM ubuntu:22.04 AS voxl-deps
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Use French mirror for faster/more reliable apt downloads
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://ubuntu.univ-reims.fr/ubuntu|g' /etc/apt/sources.list \
+  && sed -i 's|http://security.ubuntu.com/ubuntu|http://ubuntu.univ-reims.fr/ubuntu|g' /etc/apt/sources.list
+
 # Setup locale
 RUN apt-get update && apt-get install -y \
   locales \

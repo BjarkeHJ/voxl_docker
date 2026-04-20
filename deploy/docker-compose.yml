@@ -25,5 +25,5 @@ services:
     restart: unless-stopped
     stdin_open: true
     tty: true
-    command: ["/bin/bash"]
+    command: ["ros2", "launch", "ircam_driver", "stereo_ircam_composed.launch.py"]
     entrypoint: ["/tmp/entrypoint.sh"]
