@@ -8,23 +8,7 @@
     </General>
 
     <SharedMemory>
-      <Enable>true</Enable>
+      <Enable>false</Enable>
     </SharedMemory>
   </Domain>
 </CycloneDDS>
-
-<!-- <CycloneDDS>
-  <Domain>
-    <General>
-      <Interfaces>
-        <NetworkInterface name="lo"/>
-        <NetworkInterface name="wlan0"/>
-      </Interfaces>
-      <AllowMulticast>true</AllowMulticast>
-    </General>
-
-    <SharedMemory>
-      <Enable>true</Enable>
-    </SharedMemory>
-  </Domain>
-</CycloneDDS> -->
